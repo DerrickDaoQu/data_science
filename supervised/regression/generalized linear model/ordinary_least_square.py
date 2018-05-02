@@ -15,10 +15,9 @@ class OrdinaryLeastSquare:
     def __resid(self, y_true, y):
         return y_true - y
 
-    # train model
-    # parameters: x: feature matrix, y: target variable, e: termination criteria
-    # learning_rate: model update step, verbose: whether to print debug info
-    # fit_intercept: whether to fit intercept
+    # train linear regression model using gradient descent
+    # parameters: x: feature matrix, y: target variable, max_iter: maximum #iterations, e: termination criteria
+    # learning_rate: model update step, verbose: whether to print debug info, fit_intercept: whether to fit intercept
     def fit(self, x, y, max_iter=1000, e=None, learning_rate=0.001, verbose=False, fit_intercept=True):
         n = x.shape[0]
 
