@@ -1,70 +1,52 @@
+import tensorflow as tf
 import numpy as np
-import pandas as pd
-import random
-# import sklearn
-# from sklearn.datasets.samples_generator import make_regression
-import pylab
-from scipy import stats
-from mpl_toolkits.mplot3d import Axes3D
-import matplotlib as mpl
-import matplotlib.pyplot as plt
+import os
+
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
 
-def compute_cost_function(m, t0, t1, x, y):
-    return 1 / 2 / m * sum([(t0 + t1 * np.asarray([x[i]]) - y[i]) ** 2 for i in range(m)])
+tf.reset_default_graph()
+graph = tf.Graph()
+
+with graph.as_default():
+
+    features = tf.placeholder(shape=[None, 1], dtype=tf.float32)
+    values = tf.placeholder(shape=[None, 1], dtype=tf.float32)
+
+    # norm1 = tf.layers.batch_normalization(features)
+    # dense1 = tf.layers.Dense(256, activation=tf.nn.relu)
+    # dense_1 = dense1.apply(features)
+    #
+    # dense2 = tf.layers.Dense(256, activation=tf.nn.relu)
+    # dense_2 = dense2.apply(dense_1)
+    #
+    # dense3 = tf.layers.Dense(256, activation=tf.nn.relu)
+    # dense_3 = dense3.apply(dense_2)
+
+    dense4 = tf.layers.Dense(1)
+    dense_4 = dense4.apply(features)
+
+    # dense1 = tf.nn.relu(dense1)
+    #
+    # norm2 = tf.layers.batch_normalization(dense1)
+    # dense2 = tf.layers.dense(norm2, 8)
+
+    loss = tf.losses.mean_squared_error(values, dense_4)
+
+    train = tf.train.AdamOptimizer(0.01).minimize(loss)
 
 
-def gradient_descent(alpha, x, y, ep=0.0001, max_iter=1500):
-    converged = False
-    iter = 0
-    m = x.shape[0]  # number of samples
-
-    # initial theta
-    t0 = 0
-    t1 = 0
-
-    # total error, J(theta)
-    J = compute_cost_function(m, t0, t1, x, y)
-    # Iterate Loop
-    num_iter = 0
-    while not converged:
-        # for each training sample, compute the gradient (d/d_theta j(theta))
-        grad0 = 1.0 / m * sum([(t0 + t1 * np.asarray([x[i]]) - y[i]) for i in range(m)])
-        grad1 = 1.0 / m * sum([(t0 + t1 * np.asarray([x[i]]) - y[i]) * np.asarray([x[i]]) for i in range(m)])
-
-        # update the theta_temp
-        temp0 = t0 - alpha * grad0
-        temp1 = t1 - alpha * grad1
-
-        # update theta
-        t0 = temp0
-        t1 = temp1
-
-        # mean squared error
-        e = compute_cost_function(m, t0, t1, x, y)
-        J = e  # update error
-        iter += 1  # update iter
-
-        if iter == max_iter:
-            print('Max interactions exceeded!')
-            converged = True
-
-    return t0, t1
+x = np.linspace(0, 1000, 100000).reshape(-1, 1) / 1000
+y = (3.5 * x + 5).reshape(-1, 1)
 
 
-def plot_cost_function(x, y, m):
-    t0 = list(range(0, x.shape[0]))
-    j_values = []
-    for i in range(len(t0)):
-        j_values.append(compute_cost_function(m, i, i, x, y)[0])
-    print('j_values', len(j_values), len(x), len(y))
-    fig = plt.figure()
-    ax = fig.gca(projection='3d')
-    ax.plot(x, y, j_values, label='parametric curve')
-    ax.legend()
-    plt.show()
+with graph.as_default():
+    with tf.Session() as sess:
+        tf.global_variables_initializer().run()
 
+        for i in range(20000):
+            _, l=sess.run([train, loss], feed_dict={features:x, values:y})
+            if i % 100 ==0:
+                print(l)
 
-x_data = np.arange(1000).reshape(-1, 1)
-y = (10 * x_data[:, 0] + 2000).reshape(-1, 1)
-t0, t1 = gradient_descent(0.000001, x_data, y, max_iter=100)
+        print(sess.run([dense_4], feed_dict={features:[[100]]}))

@@ -1,12 +1,13 @@
 import numpy as np
 from sklearn.datasets.samples_generator import make_regression
 
+
 # uncomment the following line to cross check with sklearn results
 # from sklearn.linear_model import LinearRegression
 
-
 # linear regression using gradient descent
-class OrdinaryLeastSquare:
+class GradientDescent:
+
     def __init__(self):
         self.intercept = None
         self.coef = None
@@ -73,7 +74,7 @@ if __name__ == '__main__':
     # normalize and standardize
     x = (x - x.mean(axis=0)) / x.std(axis=0)
 
-    ols = OrdinaryLeastSquare()
+    ols = GradientDescent()
     o = ols.fit(x, y, max_iter=10000, verbose=False)
     print(o.intercept, ', ', o.coef)
 
